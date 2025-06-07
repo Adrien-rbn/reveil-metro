@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Réveil Métro - Ne ratez plus votre arrêt !</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 30px;
+            max-width: 400px;
+            width: 100%;
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease;
+        }
+
+        .container:hover {
+            transform: translateY(-5px);
+        }
+
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 28px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+            animation: fadeIn 0.5s ease 0.2s both;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            animation: fadeIn 0.5s ease 0.4s both;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e8ed;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            animation: fadeIn 0.5s ease 0.6s both;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #666;
+            border: 2px solid #e1e8ed;
+            animation: fadeIn 0.5s ease 0.8s both;
+        }
+
+        .btn-secondary:hover {
+            background: #e9ecef;
+            border-color: #dee2e6;
+        }
+
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 14px;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        .status.active {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status.warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+
+        .distance-info {
+            background: #e7f1ff;
+            border: 1px solid #b8daff;
+            color: #004085;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 13px;
+            text-align: center;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        .alarm-animation {
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            }
+            50% {
+                transform: scale(1.02);
+                box-shadow: 0 25px 70px rgba(102, 126, 234, 0.5);
+            }
+            100% {
+                transform: scale(1);
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            }
+        }
+
+        .icon {
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            .btn {
+                font-size: 14px;
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="mainContainer">
+        <h1>🚇 Réveil Métro</h1>
+        <p class="subtitle">Ne ratez plus jamais votre arrêt !</p>
+        
+        <div class="input-group">
+            <label for="stationName">Nom de votre station d'arrivée :</label>
+            <input type="text" id="stationName" placeholder="Ex: Châtelet, République..." autocomplete="off">
+        </div>
+        
+        <button class="btn btn-primary" id="startBtn" onclick="startMonitoring()">
+            <span class="icon">📍</span>Démarrer la surveillance
+        </button>
+        
+        <button class="btn btn-secondary" id="stopBtn" onclick="stopMonitoring()" style="display: none;">
+            <span class="icon">⏹️</span>Arrêter
+        </button>
+        
+        <div id="status" class="status"></div>
+        <div id="distanceInfo" class="distance-info"></div>
+    </div>
+
+    <script>
+        // Base de données des stations de métro parisiennes avec leurs coordonnées GPS
+        const metroStations = {
+            // Stations existantes
+            "châtelet": { lat: 48.8583, lng: 2.3478, fullName: "Châtelet" },
+            "république": { lat: 48.8674, lng: 2.3638, fullName: "République" },
+            "nation": { lat: 48.8485, lng: 2.3981, fullName: "Nation" },
+            "belleville": { lat: 48.8720, lng: 2.3769, fullName: "Belleville" },
+            "bastille": { lat: 48.8531, lng: 2.3689, fullName: "Bastille" },
+            "gare de lyon": { lat: 48.8443, lng: 2.3737, fullName: "Gare de Lyon" },
+            "montparnasse": { lat: 48.8421, lng: 2.3219, fullName: "Montparnasse" },
+            "charles de gaulle étoile": { lat: 48.8738, lng: 2.2950, fullName: "Charles de Gaulle - Étoile" },
+            "étoile": { lat: 48.8738, lng: 2.2950, fullName: "Charles de Gaulle - Étoile" },
+            "concorde": { lat: 48.8656, lng: 2.3212, fullName: "Concorde" },
+            "opéra": { lat: 48.8708, lng: 2.3322, fullName: "Opéra" },
+            "trocadéro": { lat: 48.8637, lng: 2.2863, fullName: "Trocadéro" },
+            "place d'italie": { lat: 48.8314, lng: 2.3550, fullName: "Place d'Italie" },
+            "père lachaise": { lat: 48.8629, lng: 2.3870, fullName: "Père Lachaise" },
+            "pigalle": { lat: 48.8824, lng: 2.3376, fullName: "Pigalle" },
+            "barbès": { lat: 48.8839, lng: 2.3497, fullName: "Barbès - Rochechouart" },
+            "la défense": { lat: 48.8919, lng: 2.2385, fullName: "La Défense" },
+            "porte de vincennes": { lat: 48.8472, lng: 2.4115, fullName: "Porte de Vincennes" },
+            "hôtel de ville": { lat: 48.8577, lng: 2.3518, fullName: "Hôtel de Ville" },
+            "odéon": { lat: 48.8522, lng: 2.3388, fullName: "Odéon" },
+            "saint-lazare": { lat: 48.8755, lng: 2.3267, fullName: "Saint-Lazare" },
+            
+            // LIGNE 1
+            "château de vincennes": { lat: 48.8446, lng: 2.4401, fullName: "Château de Vincennes" },
+            "bérault": { lat: 48.8453, lng: 2.4283, fullName: "Bérault" },
+            "saint-mandé": { lat: 48.8464, lng: 2.4187, fullName: "Saint-Mandé" },
+            "reuilly-diderot": { lat: 48.8472, lng: 2.3862, fullName: "Reuilly - Diderot" },
+            "saint-paul": { lat: 48.8550, lng: 2.3610, fullName: "Saint-Paul" },
+            "palais royal musée du louvre": { lat: 48.8627, lng: 2.3365, fullName: "Palais Royal - Musée du Louvre" },
+            "palais royal": { lat: 48.8627, lng: 2.3365, fullName: "Palais Royal - Musée du Louvre" },
+            "tuileries": { lat: 48.8646, lng: 2.3305, fullName: "Tuileries" },
+            "champs-élysées clemenceau": { lat: 48.8678, lng: 2.3138, fullName: "Champs-Élysées - Clemenceau" },
+            "franklin d. roosevelt": { lat: 48.8689, lng: 2.3097, fullName: "Franklin D. Roosevelt" },
+            "george v": { lat: 48.8721, lng: 2.3012, fullName: "George V" },
+            "argentine": { lat: 48.8776, lng: 2.2890, fullName: "Argentine" },
+            "porte maillot": { lat: 48.8779, lng: 2.2819, fullName: "Porte Maillot" },
+            "les sablons": { lat: 48.8807, lng: 2.2720, fullName: "Les Sablons" },
+            "pont de neuilly": { lat: 48.8849, lng: 2.2598, fullName: "Pont de Neuilly" },
+            "esplanade de la défense": { lat: 48.8877, lng: 2.2504, fullName: "Esplanade de la Défense" },
+            
+            // LIGNE 3
+            "pont de levallois bécon": { lat: 48.8978, lng: 2.2808, fullName: "Pont de Levallois - Bécon" },
+            "anatole france": { lat: 48.8920, lng: 2.2852, fullName: "Anatole France" },
+            "louise michel": { lat: 48.8887, lng: 2.2881, fullName: "Louise Michel" },
+            "porte de champerret": { lat: 48.8858, lng: 2.2922, fullName: "Porte de Champerret" },
+            "pereire": { lat: 48.8846, lng: 2.2986, fullName: "Pereire" },
+            "wagram": { lat: 48.8840, lng: 2.3049, fullName: "Wagram" },
+            "malesherbes": { lat: 48.8827, lng: 2.3114, fullName: "Malesherbes" },
+            "villiers": { lat: 48.8811, lng: 2.3159, fullName: "Villiers" },
+            "europe": { lat: 48.8789, lng: 2.3228, fullName: "Europe" },
+            "havre caumartin": { lat: 48.8735, lng: 2.3281, fullName: "Havre - Caumartin" },
+            "quatre-septembre": { lat: 48.8694, lng: 2.3363, fullName: "Quatre-Septembre" },
+            "bourse": { lat: 48.8688, lng: 2.3413, fullName: "Bourse" },
+            "sentier": { lat: 48.8677, lng: 2.3475, fullName: "Sentier" },
+            "réaumur sébastopol": { lat: 48.8667, lng: 2.3523, fullName: "Réaumur - Sébastopol" },
+            "arts et métiers": { lat: 48.8654, lng: 2.3560, fullName: "Arts et Métiers" },
+            "temple": { lat: 48.8667, lng: 2.3617, fullName: "Temple" },
+            "parmentier": { lat: 48.8650, lng: 2.3748, fullName: "Parmentier" },
+            "rue saint-maur": { lat: 48.8643, lng: 2.3806, fullName: "Rue Saint-Maur" },
+            "gambetta": { lat: 48.8647, lng: 2.3986, fullName: "Gambetta" },
+            "porte de bagnolet": { lat: 48.8640, lng: 2.4089, fullName: "Porte de Bagnolet" },
+            "gallieni": { lat: 48.8633, lng: 2.4161, fullName: "Gallieni" },
+            
+            // LIGNE 4
+            "porte de clignancourt": { lat: 48.8973, lng: 2.3444, fullName: "Porte de Clignancourt" },
+            "simplon": { lat: 48.8944, lng: 2.3473, fullName: "Simplon" },
+            "marcadet poissonniers": { lat: 48.8912, lng: 2.3499, fullName: "Marcadet - Poissonniers" },
+            "château rouge": { lat: 48.8870, lng: 2.3491, fullName: "Château Rouge" },
+            "barbès rochechouart": { lat: 48.8839, lng: 2.3497, fullName: "Barbès - Rochechouart" },
+            "gare du nord": { lat: 48.8809, lng: 2.3555, fullName: "Gare du Nord" },
+            "gare de l'est": { lat: 48.8769, lng: 2.3592, fullName: "Gare de l'Est" },
+            "château d'eau": { lat: 48.8729, lng: 2.3558, fullName: "Château d'Eau" },
+            "strasbourg saint-denis": { lat: 48.8692, lng: 2.3541, fullName: "Strasbourg - Saint-Denis" },
+            "réaumur sébastopol": { lat: 48.8667, lng: 2.3523, fullName: "Réaumur - Sébastopol" },
+            "étienne marcel": { lat: 48.8636, lng: 2.3499, fullName: "Étienne Marcel" },
+            "les halles": { lat: 48.8625, lng: 2.3463, fullName: "Les Halles" },
+            "cité": { lat: 48.8559, lng: 2.3472, fullName: "Cité" },
+            "saint-michel": { lat: 48.8534, lng: 2.3441, fullName: "Saint-Michel" },
+            "saint-germain-des-prés": { lat: 48.8536, lng: 2.3338, fullName: "Saint-Germain-des-Prés" },
+            "saint-sulpice": { lat: 48.8516, lng: 2.3309, fullName: "Saint-Sulpice" },
+            "saint-placide": { lat: 48.8469, lng: 2.3268, fullName: "Saint-Placide" },
+            "montparnasse bienvenue": { lat: 48.8421, lng: 2.3219, fullName: "Montparnasse - Bienvenue" },
+            "vavin": { lat: 48.8420, lng: 2.3289, fullName: "Vavin" },
+            "raspail": { lat: 48.8390, lng: 2.3302, fullName: "Raspail" },
+            "denfert-rochereau": { lat: 48.8336, lng: 2.3323, fullName: "Denfert-Rochereau" },
+            "mouton-duvernet": { lat: 48.8317, lng: 2.3302, fullName: "Mouton-Duvernet" },
+            "alésia": { lat: 48.8281, lng: 2.3265, fullName: "Alésia" },
+            "porte d'orléans": { lat: 48.8230, lng: 2.3254, fullName: "Porte d'Orléans" },
+            "mairie de montrouge": { lat: 48.8182, lng: 2.3197, fullName: "Mairie de Montrouge" },
+            
+            // LIGNE 10
+            "boulogne pont de saint-cloud": { lat: 48.8409, lng: 2.2280, fullName: "Boulogne - Pont de Saint-Cloud" },
+            "boulogne jean jaurès": { lat: 48.8422, lng: 2.2391, fullName: "Boulogne - Jean Jaurès" },
+            "michel-ange molitor": { lat: 48.8447, lng: 2.2516, fullName: "Michel-Ange - Molitor" },
+            "chardon lagache": { lat: 48.8453, lng: 2.2660, fullName: "Chardon Lagache" },
+            "mirabeau": { lat: 48.8470, lng: 2.2730, fullName: "Mirabeau" },
+            "javel andré citroën": { lat: 48.8460, lng: 2.2777, fullName: "Javel - André Citroën" },
+            "église d'auteuil": { lat: 48.8478, lng: 2.2695, fullName: "Église d'Auteuil" },
+            "michel-ange auteuil": { lat: 48.8478, lng: 2.2642, fullName: "Michel-Ange - Auteuil" },
+            "porte d'auteuil": { lat: 48.8482, lng: 2.2587, fullName: "Porte d'Auteuil" },
+            "la motte-picquet grenelle": { lat: 48.8490, lng: 2.2981, fullName: "La Motte-Picquet - Grenelle" },
+            "ségur": { lat: 48.8467, lng: 2.3080, fullName: "Ségur" },
+            "duroc": { lat: 48.8470, lng: 2.3164, fullName: "Duroc" },
+            "vaneau": { lat: 48.8489, lng: 2.3210, fullName: "Vaneau" },
+            "sèvres babylone": { lat: 48.8518, lng: 2.3268, fullName: "Sèvres - Babylone" },
+            "mabillon": { lat: 48.8530, lng: 2.3355, fullName: "Mabillon" },
+            "cluny la sorbonne": { lat: 48.8509, lng: 2.3449, fullName: "Cluny - La Sorbonne" },
+            "maubert mutualité": { lat: 48.8499, lng: 2.3498, fullName: "Maubert - Mutualité" },
+            "cardinal lemoine": { lat: 48.8467, lng: 2.3515, fullName: "Cardinal Lemoine" },
+            "jussieu": { lat: 48.8459, lng: 2.3545, fullName: "Jussieu" },
+            "gare d'austerlitz": { lat: 48.8428, lng: 2.3660, fullName: "Gare d'Austerlitz" }
+        };
+
+        let watchId = null;
+        let targetStation = null;
+        let alarmSound = null;
+        let hasArrived = false;
+
+        // Créer le son d'alarme
+        function createAlarmSound() {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            
+            return function playAlarm() {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = 800;
+                oscillator.type = 'sine';
+                
+                gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+                gainNode.gain.linearRampToValueAtTime(0.5, audioContext.currentTime + 0.1);
+                gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.5);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.5);
+                
+                // Répéter l'alarme
+                setTimeout(() => {
+                    if (hasArrived) {
+                        playAlarm();
+                    }
+                }, 600);
+            };
+        }
+
+        // Calculer la distance entre deux points GPS
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371e3; // Rayon de la Terre en mètres
+            const φ1 = lat1 * Math.PI/180;
+            const φ2 = lat2 * Math.PI/180;
+            const Δφ = (lat2-lat1) * Math.PI/180;
+            const Δλ = (lon2-lon1) * Math.PI/180;
+
+            const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+                    Math.cos(φ1) * Math.cos(φ2) *
+                    Math.sin(Δλ/2) * Math.sin(Δλ/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+            return R * c; // Distance en mètres
+        }
+
+        // Normaliser le nom de la station
+        function normalizeStationName(name) {
+            return name.toLowerCase()
+                      .normalize("NFD")
+                      .replace(/[\u0300-\u036f]/g, "")
+                      .replace(/[^a-z0-9]/g, "") // Enlever tous les caractères spéciaux
+                      .trim();
+        }
+
+        // Calculer la distance de Levenshtein entre deux chaînes
+        function levenshteinDistance(str1, str2) {
+            const matrix = [];
+            for (let i = 0; i <= str2.length; i++) {
+                matrix[i] = [i];
+            }
+            for (let j = 0; j <= str1.length; j++) {
+                matrix[0][j] = j;
+            }
+            for (let i = 1; i <= str2.length; i++) {
+                for (let j = 1; j <= str1.length; j++) {
+                    if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
+                        matrix[i][j] = matrix[i - 1][j - 1];
+                    } else {
+                        matrix[i][j] = Math.min(
+                            matrix[i - 1][j - 1] + 1,
+                            matrix[i][j - 1] + 1,
+                            matrix[i - 1][j] + 1
+                        );
+                    }
+                }
+            }
+            return matrix[str2.length][str1.length];
+        }
+
+        // Trouver la meilleure correspondance de station
+        function findBestMatch(input) {
+            const normalizedInput = normalizeStationName(input);
+            let bestMatch = null;
+            let bestDistance = Infinity;
+            
+            for (const [key, station] of Object.entries(metroStations)) {
+                const normalizedKey = normalizeStationName(key);
+                
+                // Correspondance exacte
+                if (normalizedKey === normalizedInput) {
+                    return station;
+                }
+                
+                // Correspondance partielle (si l'input est contenu dans le nom)
+                if (normalizedKey.includes(normalizedInput) || normalizedInput.includes(normalizedKey)) {
+                    return station;
+                }
+                
+                // Calculer la distance de Levenshtein
+                const distance = levenshteinDistance(normalizedInput, normalizedKey);
+                if (distance < bestDistance && distance <= 2) {
+                    bestDistance = distance;
+                    bestMatch = station;
+                }
+            }
+            
+            return bestMatch;
+        }
+
+        // Démarrer la surveillance
+        function startMonitoring() {
+            const stationInput = document.getElementById('stationName').value;
+            
+            if (!stationInput) {
+                showStatus('Veuillez entrer le nom d\'une station', 'error');
+                return;
+            }
+
+            targetStation = findBestMatch(stationInput);
+
+            if (!targetStation) {
+                showStatus('Station non trouvée. Vérifiez l\'orthographe.', 'error');
+                return;
+            }
+
+            if (!navigator.geolocation) {
+                showStatus('La géolocalisation n\'est pas supportée par votre navigateur', 'error');
+                return;
+            }
+
+            hasArrived = false;
+            alarmSound = createAlarmSound();
+            
+            showStatus(`Surveillance active pour ${targetStation.fullName}`, 'active');
+            document.getElementById('startBtn').style.display = 'none';
+            document.getElementById('stopBtn').style.display = 'block';
+            document.getElementById('stationName').disabled = true;
+
+            // Options pour une meilleure précision GPS
+            const options = {
+                enableHighAccuracy: true,
+                timeout: 5000,
+                maximumAge: 0
+            };
+
+            watchId = navigator.geolocation.watchPosition(
+                checkPosition,
+                handleError,
+                options
+            );
+        }
+
+        // Vérifier la position
+        function checkPosition(position) {
+            const distance = calculateDistance(
+                position.coords.latitude,
+                position.coords.longitude,
+                targetStation.lat,
+                targetStation.lng
+            );
+
+            updateDistanceInfo(distance);
+
+            // Si on est à moins de 300 mètres de la station
+            if (distance < 300 && !hasArrived) {
+                hasArrived = true;
+                arrivedAtStation();
+            }
+        }
+
+        // Gérer les erreurs
+        function handleError(error) {
+            let message = '';
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    message = "Accès à la localisation refusé. Veuillez autoriser la géolocalisation.";
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    message = "Position indisponible. Vérifiez votre GPS.";
+                    break;
+                case error.TIMEOUT:
+                    message = "Délai d'attente dépassé. Réessayez.";
+                    break;
+                default:
+                    message = "Erreur inconnue.";
+            }
+            showStatus(message, 'error');
+        }
+
+        // Arrivée à la station
+        function arrivedAtStation() {
+            showStatus('🎉 VOUS ÊTES ARRIVÉ ! RÉVEILLEZ-VOUS !', 'warning');
+            document.getElementById('mainContainer').classList.add('alarm-animation');
+            
+            // Démarrer l'alarme
+            alarmSound();
+            
+            // Vibrer si disponible
+            if (navigator.vibrate) {
+                navigator.vibrate([500, 100, 500, 100, 500]);
+            }
+            
+            // Notification si autorisée
+            if ("Notification" in window && Notification.permission === "granted") {
+                new Notification("Réveil Métro", {
+                    body: `Vous êtes arrivé à ${targetStation.fullName} !`,
+                    icon: "🚇",
+                    requireInteraction: true
+                });
+            }
+        }
+
+        // Arrêter la surveillance
+        function stopMonitoring() {
+            if (watchId) {
+                navigator.geolocation.clearWatch(watchId);
+                watchId = null;
+            }
+            
+            hasArrived = false;
+            document.getElementById('mainContainer').classList.remove('alarm-animation');
+            document.getElementById('startBtn').style.display = 'block';
+            document.getElementById('stopBtn').style.display = 'none';
+            document.getElementById('stationName').disabled = false;
+            document.getElementById('status').style.display = 'none';
+            document.getElementById('distanceInfo').style.display = 'none';
+        }
+
+        // Afficher le statut
+        function showStatus(message, type) {
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = message;
+            statusEl.className = 'status ' + type;
+            statusEl.style.display = 'block';
+        }
+
+        // Mettre à jour l'info de distance
+        function updateDistanceInfo(distance) {
+            const distanceEl = document.getElementById('distanceInfo');
+            if (distance < 1000) {
+                distanceEl.textContent = `📏 Distance: ${Math.round(distance)} mètres`;
+            } else {
+                distanceEl.textContent = `📏 Distance: ${(distance/1000).toFixed(1)} km`;
+            }
+            distanceEl.style.display = 'block';
+        }
+
+        // Demander la permission pour les notifications au chargement
+        if ("Notification" in window && Notification.permission === "default") {
+            Notification.requestPermission();
+        }
+    </script>
+</body>
+</html>
