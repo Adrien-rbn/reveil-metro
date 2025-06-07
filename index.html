@@ -643,15 +643,6 @@
         if ("Notification" in window && Notification.permission === "default") {
             Notification.requestPermission();
         }
-
-        // Détection pour l'ajout à l'écran d'accueil
-        if ('standalone' in window.navigator && !window.navigator.standalone) {
-            if (/iPhone|iPod|iPad/.test(navigator.userAgent)) {
-                setTimeout(() => {
-                    alert('💡 Astuce : Ajoutez cette app à votre écran d\'accueil pour un meilleur fonctionnement ! Appuyez sur le bouton Partager puis "Sur l\'écran d\'accueil"');
-                }, 3000);
-            }
-        }
     </script>
 </body>
 </html>
