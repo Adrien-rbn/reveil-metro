@@ -502,21 +502,40 @@
             hasArrived = false;
             alarmSound = createAlarmSound();
             
-            showStatus(`Surveillance active pour ${targetStation.fullName}`, 'active');
+            showStatus(`📡 Recherche du signal GPS pour ${targetStation.fullName}...`, 'warning');
             document.getElementById('startBtn').style.display = 'none';
             document.getElementById('stopBtn').style.display = 'block';
             document.getElementById('stationName').disabled = true;
 
-            // Options pour une meilleure précision GPS
+            // Options améliorées pour le GPS
             const options = {
                 enableHighAccuracy: true,
-                timeout: 5000,
+                timeout: 30000,  // 30 secondes au lieu de 5
                 maximumAge: 0
             };
 
-            watchId = navigator.geolocation.watchPosition(
-                checkPosition,
-                handleError,
+            // D'abord obtenir la position actuelle avant de surveiller
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    showStatus(`Surveillance active pour ${targetStation.fullName}`, 'active');
+                    checkPosition(position);
+                    
+                    // Ensuite commencer la surveillance continue
+                    watchId = navigator.geolocation.watchPosition(
+                        checkPosition,
+                        handleError,
+                        options
+                    );
+                },
+                (error) => {
+                    // En cas d'erreur, essayer quand même la surveillance
+                    showStatus(`⚠️ GPS faible, surveillance en cours...`, 'warning');
+                    watchId = navigator.geolocation.watchPosition(
+                        checkPosition,
+                        handleError,
+                        options
+                    );
+                },
                 options
             );
         }
@@ -541,21 +560,25 @@
 
         // Gérer les erreurs
         function handleError(error) {
+            // Ne pas arrêter la surveillance en cas d'erreur temporaire
             let message = '';
             switch(error.code) {
                 case error.PERMISSION_DENIED:
                     message = "Accès à la localisation refusé. Veuillez autoriser la géolocalisation.";
+                    stopMonitoring(); // Arrêter seulement si permission refusée
                     break;
                 case error.POSITION_UNAVAILABLE:
-                    message = "Position indisponible. Vérifiez votre GPS.";
-                    break;
+                    message = "📡 Recherche du signal GPS en cours...";
+                    // Ne PAS arrêter, continuer à essayer
+                    return;
                 case error.TIMEOUT:
-                    message = "Délai d'attente dépassé. Réessayez.";
-                    break;
+                    message = "📡 Signal GPS faible, nouvelle tentative...";
+                    // Ne PAS arrêter, continuer à essayer
+                    return;
                 default:
-                    message = "Erreur inconnue.";
+                    message = "Erreur GPS temporaire.";
             }
-            showStatus(message, 'error');
+            showStatus(message, 'warning');
         }
 
         // Arrivée à la station
@@ -619,6 +642,15 @@
         // Demander la permission pour les notifications au chargement
         if ("Notification" in window && Notification.permission === "default") {
             Notification.requestPermission();
+        }
+
+        // Détection pour l'ajout à l'écran d'accueil
+        if ('standalone' in window.navigator && !window.navigator.standalone) {
+            if (/iPhone|iPod|iPad/.test(navigator.userAgent)) {
+                setTimeout(() => {
+                    alert('💡 Astuce : Ajoutez cette app à votre écran d\'accueil pour un meilleur fonctionnement ! Appuyez sur le bouton Partager puis "Sur l\'écran d\'accueil"');
+                }, 3000);
+            }
         }
     </script>
 </body>
